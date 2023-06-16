@@ -74,9 +74,9 @@ Centre for Robotics and Assembly:
 - Website: https://www.cranfield.ac.uk/centres/centre-for-robotics-and-assembly 
 
 
-### IFRA_LinkAttacher Repository
+### IFRA_ObjectPose Repository
 
-TBD.
+IFRA_ObjectPose is a simple ROS2-Gazebo plugin that publishes the exact WorldPose of any model in Gazebo to a ROS2 Topic. Thanks to this plugin, it is possible to get the (x y z)(yaw pitch roll) information of any object from Gazebo in order to use it within the ROS2 Source Code. The repository contains a Gazebo package as well, where the plugin can be easily tested and verified with a simple box.
 
 <br />
 
@@ -95,7 +95,36 @@ colcon build
 
 ## USAGE
 
-TBD.
+The "ros2_objectpose" Gazebo plugin is a MODEL PLUGIN. Thus, it has to be defined inside a model (.urdf or .sdf), and it is loaded when the model is spawned into the Gazebo World. 
+
+The following tag must be added to the .urdf file of any model that wants to be monitored:
+
+```sh
+<gazebo>
+  <plugin name="ros2_objectpose_plugin" filename="libros2_objectpose_plugin.so" />
+</gazebo>
+```
+
+The object pose will be published to the /ObjectPose_{ModelName} topic as soon as the object is spawned to the Gazebo environment.
+
+__EXAMPLE: box.urdf__
+
+1. Launch the object_pose Gazebo environment:
+    ```sh
+    ros2 launch objectpose_gazebo objectpose.launch.py
+    ```
+
+2. Spawn the BOX to the Gazebo world:
+    ```sh
+    ros2 run ros2_objectpose SpawnObject.py --package "objectpose_gazebo" --urdf "box.urdf" --name "box" --x 0.5 --y -0.5 --z 0.5
+    ```
+
+3. Check the ObjectPose in the ROS2 Terminal shell:
+    ```sh
+    ros2 topic echo /ObjectPose_box
+    ```
+
+4. Manually move the box in Gazebo, and check how the pose information is automatically updated.
 
 <br />
 
