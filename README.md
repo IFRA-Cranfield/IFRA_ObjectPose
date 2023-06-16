@@ -109,7 +109,7 @@ The object pose will be published to the /ObjectPose_{ModelName} topic as soon a
 
 __EXAMPLE: box.urdf__
 
-1. Launch the object_pose Gazebo environment:
+1. Launch the ObjectPose Gazebo environment:
     ```sh
     ros2 launch objectpose_gazebo objectpose.launch.py
     ```
