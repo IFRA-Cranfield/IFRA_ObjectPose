@@ -2,6 +2,7 @@ string objectname
 float64 x
 float64 y
 float64 z
-float64 yaw
-float64 pitch
-float64 roll
+float64 qx
+float64 qy
+float64 qz
+float64 qw

@@ -112,12 +112,13 @@ void ROS2ObjectPosePluginPrivate::OnUpdate()
 	ignition::math::Pose3d CurrentPose = model_-> WorldPose();
 
 	// ASSIGN VALUES:
-	pose_msg_.x = CurrentPose.X() ;
-	pose_msg_.y = CurrentPose.Y();
-	pose_msg_.z = CurrentPose.Z();
-	pose_msg_.yaw = CurrentPose.Yaw();
-	pose_msg_.pitch = CurrentPose.Pitch();
-	pose_msg_.roll = CurrentPose.Roll();
+	pose_msg_.x = CurrentPose.Pos().X();
+	pose_msg_.y = CurrentPose.Pos().Y();
+	pose_msg_.z = CurrentPose.Pos().Z();
+	pose_msg_.qx = CurrentPose.Rot().X();
+	pose_msg_.qy = CurrentPose.Rot().Y();
+	pose_msg_.qz = CurrentPose.Rot().Z();
+  pose_msg_.qw = CurrentPose.Rot().W();
 
   // Publish status at rate:
   rclcpp::Time now = ros_node_->get_clock()->now();
