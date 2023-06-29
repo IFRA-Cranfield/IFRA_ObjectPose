@@ -32,7 +32,7 @@
 
 -->
 
-<robot name="box">
+<robot name="box" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <link name="box">
     <collision>
@@ -71,9 +71,17 @@
     <selfCollide>false</selfCollide> 
   </gazebo>
 
+  <!-- Input parameters: -->
+  <xacro:arg name="name" default="none"/>
+  <xacro:property name="name" value="$(arg name)"/>
+
   <!-- LOAD ObjectPose Gazebo (ROS2) PLUGIN: -->
   <gazebo>
-    <plugin name="ros2_objectpose_plugin" filename="libros2_objectpose_plugin.so" />
+    <plugin name="ros2_objectpose_plugin" filename="libros2_objectpose_plugin.so" >
+      <ros>
+        <namespace>${name}</namespace>
+      </ros>
+    </plugin>
   </gazebo>
 
 </robot>

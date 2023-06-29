@@ -87,12 +87,10 @@ void ROS2ObjectPosePlugin::Load(gazebo::physics::ModelPtr _model, sdf::ElementPt
 
 	// ModelName:
 	std::string modelname = impl_->model_->GetName();
-	std::string topicname = "ObjectPose_" + modelname;
-
 	impl_->pose_msg_.objectname = modelname;
 
   // Create ObjectPose publisher:
-  impl_->pose_pub_ = impl_->ros_node_->create_publisher<objectpose_msgs::msg::ObjectPose>(topicname, 10);
+  impl_->pose_pub_ = impl_->ros_node_->create_publisher<objectpose_msgs::msg::ObjectPose>("ObjectPose", 10);
 
   double publish_rate = 100.0;
   impl_->update_ns_ = int((1/publish_rate) * 1e9);
@@ -120,12 +118,17 @@ void ROS2ObjectPosePluginPrivate::OnUpdate()
 	pose_msg_.qz = CurrentPose.Rot().Z();
   pose_msg_.qw = CurrentPose.Rot().W();
 
+  PublishStatus();
+
+  // This section below was blocking the pose publishing of >+1 objects in Gazebo (unknown reason, probably related to get_clock).
+  // It has been removed, and now the object pose is published in every single simulation iteration --> OnUpdate!
+
   // Publish status at rate:
-  rclcpp::Time now = ros_node_->get_clock()->now();
-  if (now - last_publish_time_ >= rclcpp::Duration(0, update_ns_)) {
-    PublishStatus();
-    last_publish_time_ = now;
-  }
+  //rclcpp::Time now = ros_node_->get_clock()->now();
+  //if (now - last_publish_time_ >= rclcpp::Duration(0, update_ns_)) {
+  //  PublishStatus();
+  //  last_publish_time_ = now;
+  //}
     
 }
 

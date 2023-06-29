@@ -75,7 +75,7 @@ def main():
     request.name = args.name
 
     urdf_file_path = os.path.join(get_package_share_directory(args.package), 'urdf', args.urdf) # It is assumed that the .urdf/.xacro file is located in /urdf folder!
-    xacro_file = xacro.process_file(urdf_file_path)
+    xacro_file = xacro.process_file(urdf_file_path, mappings={"name": args.name})
     request.xml = xacro_file.toxml() 
 
     request.initial_pose.position.x = float(args.x)

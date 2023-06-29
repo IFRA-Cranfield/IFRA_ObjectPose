@@ -100,12 +100,28 @@ The "ros2_objectpose" Gazebo plugin is a MODEL PLUGIN. Thus, it has to be define
 The following tag must be added to the .urdf file of any model that wants to be monitored:
 
 ```sh
+<!-- Input parameters: -->
+<xacro:arg name="name" default="none"/>
+<xacro:property name="name" value="$(arg name)"/>
+
+<!-- LOAD ObjectPose Gazebo (ROS2) PLUGIN: -->
 <gazebo>
-  <plugin name="ros2_objectpose_plugin" filename="libros2_objectpose_plugin.so" />
+  <plugin name="ros2_objectpose_plugin" filename="libros2_objectpose_plugin.so" >
+    <ros>
+      <namespace>${name}</namespace>
+    </ros>
+  </plugin>
 </gazebo>
 ```
 
-The object pose will be published to the /ObjectPose_{ModelName} topic as soon as the object is spawned to the Gazebo environment.
+The object pose will be published to the /{MODELNAME}/ObjectPose topic as soon as the object is spawned to the Gazebo environment. {MODELNAME} is defined in the CommandLine, when spawning the object to gazebo using the [SpawnObject.py](https://github.com/IFRA-Cranfield/IFRA_ObjectPose/blob/main/ros2_objectpose/python/SpawnObject.py) script.
+
+The following command must be executed in order to spawn any object to the Gazebo World:
+```sh
+  ros2 run ros2_objectpose SpawnObject.py --package "objectpose_gazebo" --urdf "{.urdf FILE}" --name "{MODELNAME}" --x {x} --y {y} --z {z}
+```
+
+NOTE: It is assumed that the .urdf file of the object is contained inside the /urdf folder.
 
 __EXAMPLE: box.urdf__
 
@@ -121,7 +137,7 @@ __EXAMPLE: box.urdf__
 
 3. Check the ObjectPose in the ROS2 Terminal shell:
     ```sh
-    ros2 topic echo /ObjectPose_box
+    ros2 topic echo /box/ObjectPose
     ```
 
 4. Manually move the box in Gazebo, and check how the pose information is automatically updated.
