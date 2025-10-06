@@ -1,85 +1,50 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 project(ros2_objectpose)
 
-# Default to C99
-if(NOT CMAKE_C_STANDARD)
-  set(CMAKE_C_STANDARD 99)
-endif()
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-
-# find dependencies
+# ROS 2:
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
-
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # uncomment the line when a copyright and license is not present in all source files
-  #set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # uncomment the line when this package is not in a git repo
-  #set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
-
-############## COMPILE the ROS2 ObjectPose Gazebo Plugin ##############
-
-# Find required packages:
-find_package(gazebo_ros REQUIRED)
-find_package(gazebo_dev REQUIRED)
-find_package(gazebo_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(objectpose_msgs REQUIRED)  # your custom msgs
 
-find_package(objectpose_msgs REQUIRED)
-
-# /include:
-include_directories(include)
-
-# ROS2 OBJECTPOSE Plugin:
-
-include_directories(${GAZEBO_INCLUDE_DIRS})
-link_directories(${GAZEBO_LIBRARY_DIRS})
+# Gazebo Fortress (Ignition):
+find_package(ignition-plugin1 REQUIRED COMPONENTS register)
+find_package(ignition-gazebo6 REQUIRED)
+find_package(ignition-math6 REQUIRED)
+find_package(ignition-common4 REQUIRED)
 
 add_library(ros2_objectpose_plugin SHARED
   src/ros2_objectpose_plugin.cpp
 )
-target_link_libraries(ros2_objectpose_plugin ${GAZEBO_LIBRARIES})
-ament_target_dependencies(ros2_objectpose_plugin
-  "rclcpp"
-  "gazebo_dev"
-  "gazebo_msgs"
-  "gazebo_ros"
-  "objectpose_msgs"
-)
-ament_export_libraries(ros2_objectpose_plugin)
-install(
-  TARGETS
-    ros2_objectpose_plugin
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
 
-# =========================================================== #
-# REQUIRED TO EXECUTE .py scripts:
-install(
-  DIRECTORY 
-    python
-  DESTINATION 
-    share/${PROJECT_NAME}
+target_include_directories(ros2_objectpose_plugin
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
 )
-install(PROGRAMS
-  python/SpawnObject.py
-  DESTINATION lib/${PROJECT_NAME} 
+
+target_compile_features(ros2_objectpose_plugin PUBLIC cxx_std_17)
+
+# Link against Ignition targets for Fortress:
+target_link_libraries(ros2_objectpose_plugin
+  ignition-plugin1::ignition-plugin1
+  ignition-gazebo6::ignition-gazebo6
+  ignition-math6::ignition-math6
+  ignition-common4::ignition-common4
 )
+
+ament_target_dependencies(ros2_objectpose_plugin
+  rclcpp
+  objectpose_msgs
+)
+
+install(TARGETS ros2_objectpose_plugin LIBRARY DESTINATION lib)
+install(DIRECTORY include/ DESTINATION include)
+
+ament_export_include_directories(include)
+ament_export_dependencies(rclcpp objectpose_msgs)
 
 ament_package()

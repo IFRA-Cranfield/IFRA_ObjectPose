@@ -30,113 +30,127 @@
 
 */
 
-#include <gazebo/physics/Model.hh>
-#include <gazebo/physics/World.hh>
-#include <gazebo/physics/Joint.hh>
-#include <gazebo_ros/node.hpp>
-#include <rclcpp/rclcpp.hpp>
+// INCLUDE -> HPP header file:
+#include "ros2_objectpose/ros2_objectpose_plugin.hpp"
 
-#include "ros2_objectpose/ros2_objectpose_plugin.hpp"        // Header file.
-#include <objectpose_msgs/msg/object_pose.hpp>                // ROS2 Message.
+// INLCUDE -> Ignition Gazebo:
+#include <ignition/gazebo/Util.hh>
+#include <ignition/gazebo/EntityComponentManager.hh>
+#include <ignition/math/Pose3.hh>
 
-#include <memory>
-
-namespace gazebo_ros
+namespace ros2_objectpose
 {
 
-class ROS2ObjectPosePluginPrivate
+static std::once_flag g_rosInitOnce;
+
+Ros2ObjectPose::~Ros2ObjectPose()
 {
-public:
-
-  // ROS node for communication, managed by gazebo_ros.
-  gazebo_ros::Node::SharedPtr ros_node_;
-
-  // MODEL -> OBJECT:
-  gazebo::physics::ModelPtr model_;
-  
-  // PUBLISH ObjectPose:
-  void PublishStatus();                                                          // Method to publish ObjectPose.
-  rclcpp::Publisher<objectpose_msgs::msg::ObjectPose>::SharedPtr pose_pub_;      // Publisher.
-  objectpose_msgs::msg::ObjectPose pose_msg_;                                    // ObjectPose.
-
-  // WORLD UPDATE event:
-  void OnUpdate();
-  rclcpp::Time last_publish_time_;
-  int update_ns_;
-  gazebo::event::ConnectionPtr update_connection_;  // Connection to world update event. Callback is called while this is alive.
-
-};
-
-ROS2ObjectPosePlugin::ROS2ObjectPosePlugin()
-: impl_(std::make_unique<ROS2ObjectPosePluginPrivate>())
-{
+  if (rclcpp::ok()) rclcpp::shutdown();
+  if (spinThread_.joinable()) spinThread_.join();
 }
 
-ROS2ObjectPosePlugin::~ROS2ObjectPosePlugin()
+void Ros2ObjectPose::Configure(const ignition::gazebo::Entity &entity,
+                               const std::shared_ptr<const sdf::Element> &sdf,
+                               ignition::gazebo::EntityComponentManager &ecm,
+                               ignition::gazebo::EventManager &)
 {
+  model_ = ignition::gazebo::Model(entity);
+  targetEntity_ = entity;
+  targetIsModel_ = true;
+
+  // Optional SDF params:
+  // <ros><namespace>ns</namespace></ros>
+  // <topic>ObjectPose</topic>
+  // <frame_id>world</frame_id>  (kept; not used in msg)
+  // <object_name>MyObject</object_name>
+  // <link_name>tool0</link_name>
+
+  if (sdf)
+  {
+    if (sdf->HasElement("ros"))
+    {
+      auto rosElem = sdf->FindElement("ros");
+      if (rosElem && rosElem->HasElement("namespace"))
+        ns_ = rosElem->Get<std::string>("namespace");
+    }
+    if (sdf->HasElement("topic"))
+      topic_ = sdf->Get<std::string>("topic");
+    if (sdf->HasElement("frame_id"))
+      frame_id_ = sdf->Get<std::string>("frame_id");
+    if (sdf->HasElement("object_name"))
+      object_name_ = sdf->Get<std::string>("object_name");
+
+    if (sdf->HasElement("link_name"))
+    {
+      const auto linkName = sdf->Get<std::string>("link_name");
+      auto linkEntity = model_.LinkByName(ecm, linkName);
+      if (linkEntity != ignition::gazebo::kNullEntity)
+      {
+        targetEntity_ = linkEntity;
+        targetIsModel_ = false;
+      }
+      else
+      {
+        igndbg << "[Ros2ObjectPose] link_name '" << linkName
+               << "' not found; falling back to model pose.\n";
+      }
+    }
+  }
+
+  if (object_name_.empty())
+  {
+    auto nameComp = ecm.Component<ignition::gazebo::components::Name>(targetEntity_);
+    if (nameComp) object_name_ = nameComp->Data();
+    else          object_name_ = "object";
+  }
+
+  std::call_once(g_rosInitOnce, [](){
+    int argc = 0; char **argv = nullptr;
+    rclcpp::init(argc, argv);
+  });
+
+  rclcpp::NodeOptions opts;
+  opts.append_parameter_override("use_sim_time", true);
+  node_ = std::make_shared<rclcpp::Node>("ifra_object_pose", ns_, opts);
+
+  pub_ = node_->create_publisher<objectpose_msgs::msg::ObjectPose>(topic_, rclcpp::QoS(10));
+
+  spinThread_ = std::thread([this]{
+    rclcpp::executors::SingleThreadedExecutor exec;
+    exec.add_node(node_);
+    exec.spin();
+  });
+
+  ecm.CreateComponent(targetEntity_, ignition::gazebo::components::Pose());
 }
 
-void ROS2ObjectPosePlugin::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
+void Ros2ObjectPose::PostUpdate(const ignition::gazebo::UpdateInfo &,
+                                const ignition::gazebo::EntityComponentManager &ecm)
 {
-  
-  // Create ROS2 node:
-  impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
+  auto poseComp = ecm.Component<ignition::gazebo::components::Pose>(targetEntity_);
+  if (!poseComp || !pub_) return;
 
-  // OBTAIN -> MODEL (OBJECT):
-  impl_->model_ = _model;
+  const auto &p = poseComp->Data();
 
-	// ModelName:
-	std::string modelname = impl_->model_->GetName();
-	impl_->pose_msg_.objectname = modelname;
+  objectpose_msgs::msg::ObjectPose msg;
+  msg.objectname = object_name_;
+  msg.x  = p.Pos().X();
+  msg.y  = p.Pos().Y();
+  msg.z  = p.Pos().Z();
+  msg.qx = p.Rot().X();
+  msg.qy = p.Rot().Y();
+  msg.qz = p.Rot().Z();
+  msg.qw = p.Rot().W();
 
-  // Create ObjectPose publisher:
-  impl_->pose_pub_ = impl_->ros_node_->create_publisher<objectpose_msgs::msg::ObjectPose>("ObjectPose", 10);
-
-  double publish_rate = 100.0;
-  impl_->update_ns_ = int((1/publish_rate) * 1e9);
-  impl_->last_publish_time_ = impl_->ros_node_->get_clock()->now();
-
-  // Create a connection so the OnUpdate function is called at every simulation iteration: 
-  impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-    std::bind(&ROS2ObjectPosePluginPrivate::OnUpdate, impl_.get()));
-
-  RCLCPP_INFO(impl_->ros_node_->get_logger(), "GAZEBO ObjectPose plugin loaded successfully.");
+  pub_->publish(msg);
 }
 
-void ROS2ObjectPosePluginPrivate::OnUpdate()
-{
-  
-	// GET ObjectPose from GAZEBO API, and assign it to pose_msg_:
-	ignition::math::Pose3d CurrentPose = model_-> WorldPose();
+} // namespace ros2_objectpose
 
-	// ASSIGN VALUES:
-	pose_msg_.x = CurrentPose.Pos().X();
-	pose_msg_.y = CurrentPose.Pos().Y();
-	pose_msg_.z = CurrentPose.Pos().Z();
-	pose_msg_.qx = CurrentPose.Rot().X();
-	pose_msg_.qy = CurrentPose.Rot().Y();
-	pose_msg_.qz = CurrentPose.Rot().Z();
-  pose_msg_.qw = CurrentPose.Rot().W();
+IGNITION_ADD_PLUGIN(
+  ros2_objectpose::Ros2ObjectPose,
+  ignition::gazebo::System,
+  ros2_objectpose::Ros2ObjectPose::ISystemConfigure,
+  ros2_objectpose::Ros2ObjectPose::ISystemPostUpdate)
 
-  PublishStatus();
-
-  // This section below was blocking the pose publishing of >+1 objects in Gazebo (unknown reason, probably related to get_clock).
-  // It has been removed, and now the object pose is published in every single simulation iteration --> OnUpdate!
-
-  // Publish status at rate:
-  //rclcpp::Time now = ros_node_->get_clock()->now();
-  //if (now - last_publish_time_ >= rclcpp::Duration(0, update_ns_)) {
-  //  PublishStatus();
-  //  last_publish_time_ = now;
-  //}
-    
-}
-
-void ROS2ObjectPosePluginPrivate::PublishStatus(){
-  
-  pose_pub_->publish(pose_msg_);
-
-}
-
-GZ_REGISTER_MODEL_PLUGIN(ROS2ObjectPosePlugin)
-}  // namespace gazebo_ros
+IGNITION_ADD_PLUGIN_ALIAS(ros2_objectpose::Ros2ObjectPose, "ros2_objectpose_plugin")

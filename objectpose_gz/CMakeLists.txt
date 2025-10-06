@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(objectpose_gazebo)
+project(objectpose_gz)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -35,10 +35,23 @@ endif()
 install(
   DIRECTORY 
     launch
+    sdf
     worlds
-    urdf
   DESTINATION 
     share/${PROJECT_NAME}
+)
+
+# =========================================================== #
+# REQUIRED TO EXECUTE .py scripts:
+install(
+  DIRECTORY 
+    python
+  DESTINATION 
+    share/${PROJECT_NAME}
+)
+install(PROGRAMS
+  python/SpawnObject.py
+  DESTINATION lib/${PROJECT_NAME} 
 )
 
 ament_package()

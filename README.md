@@ -95,44 +95,37 @@ colcon build
 
 ## USAGE
 
-The "ros2_objectpose" Gazebo plugin is a MODEL PLUGIN. Thus, it has to be defined inside a model (.urdf or .sdf), and it is loaded when the model is spawned into the Gazebo World. 
+The "ros2_objectpose" Gz plugin has to be defined inside a SDF model (.sdf), and it is loaded when the model is spawned into the Gz World. 
 
-The following tag must be added to the .urdf file of any model that wants to be monitored:
+The following tag must be added to the .sdf file of any model that wants to be monitored:
 
 ```sh
-<!-- Input parameters: -->
-<xacro:arg name="name" default="none"/>
-<xacro:property name="name" value="$(arg name)"/>
-
-<!-- LOAD ObjectPose Gazebo (ROS2) PLUGIN: -->
-<gazebo>
-  <plugin name="ros2_objectpose_plugin" filename="libros2_objectpose_plugin.so" >
-    <ros>
-      <namespace>${name}</namespace>
-    </ros>
-  </plugin>
-</gazebo>
+<!-- ObjectPose plugin (Gazebo Fortress system plugin) -->
+<plugin name="ros2_objectpose_plugin" filename="libros2_objectpose_plugin.so">
+  <topic>$(name)/ObjectPose</topic>
+  <object_name>$(name)</object_name>
+</plugin>
 ```
 
-The object pose will be published to the /{MODELNAME}/ObjectPose topic as soon as the object is spawned to the Gazebo environment. {MODELNAME} is defined in the CommandLine, when spawning the object to gazebo using the [SpawnObject.py](https://github.com/IFRA-Cranfield/IFRA_ObjectPose/blob/main/ros2_objectpose/python/SpawnObject.py) script.
+The object pose will be published to the /{NAME}/ObjectPose topic as soon as the object is spawned to the Gz environment. {NAME} is defined in the CommandLine, when spawning the object to gazebo using the [SpawnObject.py](https://github.com/IFRA-Cranfield/IFRA_ObjectPose/blob/main/ros2_objectpose/python/SpawnObject.py) script.
 
 The following command must be executed in order to spawn any object to the Gazebo World:
 ```sh
-  ros2 run ros2_objectpose SpawnObject.py --package "objectpose_gazebo" --urdf "{.urdf FILE}" --name "{MODELNAME}" --x {x} --y {y} --z {z}
+  ros2 run objectpose_gz SpawnObject.py --package "objectpose_gz" --sdf "{.sdf FILE}" --name "{NAME}" --x {x} --y {y} --z {z}
 ```
 
-NOTE: It is assumed that the .urdf file of the object is contained inside the /urdf folder.
+NOTE: It is assumed that the .sdf file of the object is contained inside the /sdf folder of the selected package.
 
 __EXAMPLE: box.urdf__
 
-1. Launch the ObjectPose Gazebo environment:
+1. Launch the ObjectPose Gz environment:
     ```sh
-    ros2 launch objectpose_gazebo objectpose.launch.py
+    ros2 launch objectpose_gz objectpose.launch.py
     ```
 
-2. Spawn the BOX to the Gazebo world:
+2. Spawn the BOX to the Gz world:
     ```sh
-    ros2 run ros2_objectpose SpawnObject.py --package "objectpose_gazebo" --urdf "box.urdf" --name "box" --x 0.5 --y -0.5 --z 0.5
+    ros2 run objectpose_gz SpawnObject.py --package "objectpose_gz" --sdf "box.sdf" --name "box" --x 0.0 --y 0.0 --z 0.0
     ```
 
 3. Check the ObjectPose in the ROS2 Terminal shell:
@@ -140,7 +133,7 @@ __EXAMPLE: box.urdf__
     ros2 topic echo /box/ObjectPose
     ```
 
-4. Manually move the box in Gazebo, and check how the pose information is automatically updated.
+4. Manually move the box in the Simulation Environment, and check how the pose information is automatically updated.
 
 <br />
 

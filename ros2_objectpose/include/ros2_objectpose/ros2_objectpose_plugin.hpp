@@ -30,34 +30,68 @@
 
 */
 
-#ifndef ROS2_OBJECTPOSE_PLUGIN_HPP_
-#define ROS2_OBJECTPOSE_PLUGIN_HPP_
+#ifndef ROS2_OBJECTPOSE_PLUGIN_HPP
+#define ROS2_OBJECTPOSE_PLUGIN_HPP
 
-#include <gazebo/common/Plugin.hh>
 #include <memory>
+#include <thread>
+#include <string>
 
-namespace gazebo_ros
+#include <rclcpp/rclcpp.hpp>
+#include <objectpose_msgs/msg/object_pose.hpp>
+
+#include <gz/sim/System.hh>
+#include <gz/sim/Model.hh>
+#include <gz/sim/Link.hh>
+#include <gz/sim/components/Pose.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/plugin/Register.hh>
+
+namespace ros2_objectpose
 {
 
-class ROS2ObjectPosePluginPrivate;
-
-class ROS2ObjectPosePlugin : public gazebo::ModelPlugin
+class Ros2ObjectPose :
+  public gz::sim::System,
+  public gz::sim::ISystemConfigure,
+  public gz::sim::ISystemPostUpdate
 {
 public:
-  /// Constructor:
-  ROS2ObjectPosePlugin();
+  Ros2ObjectPose() = default;
+  ~Ros2ObjectPose() override;
 
-  /// Destructor:
-  virtual ~ROS2ObjectPosePlugin();
+  // Called once when the plugin is loaded:
+  void Configure(const gz::sim::Entity &entity,
+                 const std::shared_ptr<const sdf::Element> &sdf,
+                 gz::sim::EntityComponentManager &ecm,
+                 gz::sim::EventManager &/*eventMgr*/) override;
 
-  // LOAD plugin:
-  void Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf) override;
+  // Called after each simulation iteration:
+  void PostUpdate(const gz::sim::UpdateInfo &info,
+                  const gz::sim::EntityComponentManager &ecm) override;
 
 private:
 
-  std::unique_ptr<ROS2ObjectPosePluginPrivate> impl_;
+  gz::sim::Model model_{gz::sim::kNullEntity};
+  gz::sim::Entity targetEntity_{gz::sim::kNullEntity};
+  bool targetIsModel_{true};
+
+  // ROS 2:
+  std::string ns_{};
+  std::string topic_{"ObjectPose"};
+  std::string frame_id_{"world"}; 
+  std::string object_name_{};
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::Publisher<objectpose_msgs::msg::ObjectPose>::SharedPtr pub_;
+  std::thread spinThread_;
 };
 
-}  // namespace gazebo_ros
+} // namespace ros2_objectpose
 
-#endif  // ROS2_OBJECTPOSE_PLUGIN_HPP_
+// Register as a Fortress System plugin :
+IGNITION_ADD_PLUGIN(
+  ros2_objectpose::Ros2ObjectPose,
+  gz::sim::System,
+  ros2_objectpose::Ros2ObjectPose::ISystemConfigure,
+  ros2_objectpose::Ros2ObjectPose::ISystemPostUpdate)
+
+#endif // ROS2_OBJECTPOSE_PLUGIN_HPP
