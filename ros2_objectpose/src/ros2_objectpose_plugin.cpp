@@ -32,21 +32,19 @@
 
 // INCLUDE -> HPP header file:
 #include "ros2_objectpose/ros2_objectpose_plugin.hpp"
-
 // INLCUDE -> Ignition Gazebo:
-#include <ignition/gazebo/Util.hh>
 #include <ignition/gazebo/EntityComponentManager.hh>
+#include <ignition/gazebo/Util.hh>
 #include <ignition/math/Pose3.hh>
 
 namespace ros2_objectpose
 {
 
-static std::once_flag g_rosInitOnce;
-
 Ros2ObjectPose::~Ros2ObjectPose()
 {
-  if (rclcpp::ok()) rclcpp::shutdown();
-  if (spinThread_.joinable()) spinThread_.join();
+  // Only shutdown if we were the ones who initialized rclcpp
+  if (owns_rclcpp_ && rclcpp::ok())
+    rclcpp::shutdown();
 }
 
 void Ros2ObjectPose::Configure(const ignition::gazebo::Entity &entity,
@@ -57,13 +55,6 @@ void Ros2ObjectPose::Configure(const ignition::gazebo::Entity &entity,
   model_ = ignition::gazebo::Model(entity);
   targetEntity_ = entity;
   targetIsModel_ = true;
-
-  // Optional SDF params:
-  // <ros><namespace>ns</namespace></ros>
-  // <topic>ObjectPose</topic>
-  // <frame_id>world</frame_id>  (kept; not used in msg)
-  // <object_name>MyObject</object_name>
-  // <link_name>tool0</link_name>
 
   if (sdf)
   {
@@ -100,35 +91,39 @@ void Ros2ObjectPose::Configure(const ignition::gazebo::Entity &entity,
   if (object_name_.empty())
   {
     auto nameComp = ecm.Component<ignition::gazebo::components::Name>(targetEntity_);
-    if (nameComp) object_name_ = nameComp->Data();
-    else          object_name_ = "object";
+    object_name_ = nameComp ? nameComp->Data() : std::string("object");
   }
 
-  std::call_once(g_rosInitOnce, [](){
+  // Ensure a ROS 2 context exists
+  if (!rclcpp::ok())
+  {
     int argc = 0; char **argv = nullptr;
     rclcpp::init(argc, argv);
-  });
+    owns_rclcpp_ = true;
+  }
+
+  // Unique node name per entity id to avoid collisions
+  const std::string node_name = "ifra_object_pose_" +
+      std::to_string(static_cast<unsigned long long>(targetEntity_));
 
   rclcpp::NodeOptions opts;
   opts.append_parameter_override("use_sim_time", true);
-  node_ = std::make_shared<rclcpp::Node>("ifra_object_pose", ns_, opts);
+  node_ = std::make_shared<rclcpp::Node>(node_name, ns_, opts);
 
-  pub_ = node_->create_publisher<objectpose_msgs::msg::ObjectPose>(topic_, rclcpp::QoS(10));
+  pub_ = node_->create_publisher<objectpose_msgs::msg::ObjectPose>(
+      topic_, rclcpp::QoS(10));
 
-  spinThread_ = std::thread([this]{
-    rclcpp::executors::SingleThreadedExecutor exec;
-    exec.add_node(node_);
-    exec.spin();
-  });
-
+  // Ensure pose component exists so PostUpdate can read it
   ecm.CreateComponent(targetEntity_, ignition::gazebo::components::Pose());
 }
 
 void Ros2ObjectPose::PostUpdate(const ignition::gazebo::UpdateInfo &,
                                 const ignition::gazebo::EntityComponentManager &ecm)
 {
+  if (!pub_) return;
+
   auto poseComp = ecm.Component<ignition::gazebo::components::Pose>(targetEntity_);
-  if (!poseComp || !pub_) return;
+  if (!poseComp) return;
 
   const auto &p = poseComp->Data();
 

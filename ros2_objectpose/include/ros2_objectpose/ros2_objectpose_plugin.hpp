@@ -34,63 +34,59 @@
 #define ROS2_OBJECTPOSE_PLUGIN_HPP
 
 #include <memory>
-#include <thread>
 #include <string>
 
 #include <rclcpp/rclcpp.hpp>
 #include <objectpose_msgs/msg/object_pose.hpp>
 
-#include <gz/sim/System.hh>
-#include <gz/sim/Model.hh>
-#include <gz/sim/Link.hh>
-#include <gz/sim/components/Pose.hh>
-#include <gz/sim/components/Name.hh>
-#include <gz/plugin/Register.hh>
+#include <ignition/gazebo/System.hh>
+#include <ignition/gazebo/Model.hh>
+#include <ignition/gazebo/Link.hh>
+#include <ignition/gazebo/components/Pose.hh>
+#include <ignition/gazebo/components/Name.hh>
+#include <ignition/plugin/Register.hh>
 
 namespace ros2_objectpose
 {
 
 class Ros2ObjectPose :
-  public gz::sim::System,
-  public gz::sim::ISystemConfigure,
-  public gz::sim::ISystemPostUpdate
+  public ignition::gazebo::System,
+  public ignition::gazebo::ISystemConfigure,
+  public ignition::gazebo::ISystemPostUpdate
 {
 public:
   Ros2ObjectPose() = default;
   ~Ros2ObjectPose() override;
 
-  // Called once when the plugin is loaded:
-  void Configure(const gz::sim::Entity &entity,
+  void Configure(const ignition::gazebo::Entity &entity,
                  const std::shared_ptr<const sdf::Element> &sdf,
-                 gz::sim::EntityComponentManager &ecm,
-                 gz::sim::EventManager &/*eventMgr*/) override;
+                 ignition::gazebo::EntityComponentManager &ecm,
+                 ignition::gazebo::EventManager &/*eventMgr*/) override;
 
-  // Called after each simulation iteration:
-  void PostUpdate(const gz::sim::UpdateInfo &info,
-                  const gz::sim::EntityComponentManager &ecm) override;
+  void PostUpdate(const ignition::gazebo::UpdateInfo &info,
+                  const ignition::gazebo::EntityComponentManager &ecm) override;
 
 private:
-
-  gz::sim::Model model_{gz::sim::kNullEntity};
-  gz::sim::Entity targetEntity_{gz::sim::kNullEntity};
+  ignition::gazebo::Model model_{ignition::gazebo::kNullEntity};
+  ignition::gazebo::Entity targetEntity_{ignition::gazebo::kNullEntity};
   bool targetIsModel_{true};
 
-  // ROS 2:
   std::string ns_{};
   std::string topic_{"ObjectPose"};
-  std::string frame_id_{"world"}; 
+  std::string frame_id_{"world"};
   std::string object_name_{};
+
+  bool owns_rclcpp_{false};  // true if this plugin called rclcpp::init()
+
   rclcpp::Node::SharedPtr node_;
   rclcpp::Publisher<objectpose_msgs::msg::ObjectPose>::SharedPtr pub_;
-  std::thread spinThread_;
 };
 
 } // namespace ros2_objectpose
 
-// Register as a Fortress System plugin :
 IGNITION_ADD_PLUGIN(
   ros2_objectpose::Ros2ObjectPose,
-  gz::sim::System,
+  ignition::gazebo::System,
   ros2_objectpose::Ros2ObjectPose::ISystemConfigure,
   ros2_objectpose::Ros2ObjectPose::ISystemPostUpdate)
 
