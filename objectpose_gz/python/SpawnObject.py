@@ -35,6 +35,7 @@ import os
 import rclpy
 from rclpy.node import Node
 from ament_index_python.packages import get_package_share_directory
+from pathlib import Path
 
 from ros_gz_interfaces.srv import SpawnEntity
 from geometry_msgs.msg import Pose
@@ -60,24 +61,36 @@ class GzEntitySpawner(Node):
         if os.path.isabs(self.args.sdf):
             return self.args.sdf
         share = get_package_share_directory(self.args.package)
-        for sub in ('sdf', 'models'):
+        for sub in ('sdf', 'models', 'objects'):
             cand = os.path.join(share, sub, self.args.sdf)
             if os.path.exists(cand):
                 return cand
         raise FileNotFoundError(
-            f"'{self.args.sdf}' not found under {share}/sdf or {share}/models, "
+            f"'{self.args.sdf}' not found under {share}/sdf. {share}/models, or {share}/objects, "
             "and it is not an absolute path."
         )
 
     def build_sdf_string(self) -> str:
 
+        # Read the SDF file text:
         sdf_path = self._resolve_sdf_path()
-        self.get_logger().info(f'Using SDF: {sdf_path}')
         with open(sdf_path, 'r') as f:
             xml = f.read()
+        
+        # Compute absolute path to the mesh: 
+        share = get_package_share_directory(self.args.package)
+        sdf_base = os.path.splitext(os.path.basename(self.args.sdf))[0]
+        mesh_path = os.path.join(share, 'meshes', 'objects', f'{sdf_base}.dae')
+
+        if not os.path.exists(mesh_path):
+            self.get_logger().info(f"Mesh not found: {mesh_path}. Ignore this error if the sdf file does not use a mesh.")
+        
+        # Convert to a correct file URI:
+        mesh_uri = Path(mesh_path).as_uri()   
+
+        # Do your existing replacements plus the mesh:
         xml = xml.replace('$(name)', self.args.name)
-        if '<xacro:' in xml:
-            raise RuntimeError("Xacro tags detected. This spawner expects plain SDF (no Xacro).")
+        xml = xml.replace('$(mesh_uri)', mesh_uri)
         return xml
 
     def spawn(self):
@@ -112,17 +125,14 @@ class GzEntitySpawner(Node):
 def main():
 
     parser = argparse.ArgumentParser(description='Spawn an SDF model into a Gazebo (Gz Fortress) world.')
-    parser.add_argument('--package', type=str, required=True,
-                        help='Package where the SDF file is installed.')
-    parser.add_argument('--sdf', type=str, default='box.sdf',
-                        help='SDF filename (relative to the package share/sdf or absolute path).')
-    parser.add_argument('--name', type=str, required=True,
-                        help='Model instance name (also used to replace $(name) in the SDF).')
+
+    parser.add_argument('--package', type=str, required=True, help='Package where the SDF file is installed.')
+    parser.add_argument('--sdf', type=str, default='box.sdf', help='SDF filename (relative to the package share/sdf or absolute path).')
+    parser.add_argument('--name', type=str, required=True, help='Model instance name (also used to replace $(name) in the SDF).')
     parser.add_argument('--x', type=float, default=0.0, help='Initial X [m].')
     parser.add_argument('--y', type=float, default=0.0, help='Initial Y [m].')
     parser.add_argument('--z', type=float, default=0.2, help='Initial Z [m].')
-    parser.add_argument('--world', type=str, default='ros2srrc_GzWorld',
-                        help='Target world name (default: ros2srrc_GzWorld).')
+    parser.add_argument('--world', type=str, default='ros2srrc_GzWorld', help='Target world name (default: ros2srrc_GzWorld).')
 
     args, _ = parser.parse_known_args()
 
