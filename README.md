@@ -26,7 +26,7 @@
 
 # ======= CITE OUR WORK ======= #
 # You can cite our work with the following statement:
-# IFRA-Cranfield (2023) ObjectPose Plugin for ROS2-Gazebo Simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
+# IFRA-Cranfield (2023) ObjectPose Plugin for ROS 2-Gazebo Simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
 
 -->
 
@@ -37,7 +37,7 @@
 <br />
 <div align="center">
 
-  <h2 align="center">IFRA_ObjectPose - Gazebo-ROS2 Plugin</h2>
+  <h2 align="center">IFRA_ObjectPose - Gazebo-ROS 2 Plugin</h2>
 
   <p align="center">
     IFRA (Intelligent Flexible Robotics and Assembly) Group
@@ -76,17 +76,17 @@ Centre for Robotics and Assembly:
 
 ### IFRA_ObjectPose Repository
 
-IFRA_ObjectPose is a simple ROS2-Gazebo plugin that publishes the exact WorldPose of any model in Gazebo to a ROS2 Topic. Thanks to this plugin, it is possible to get the (x y z)(yaw pitch roll) information of any object from Gazebo in order to use it within the ROS2 Source Code. The repository contains a Gazebo package as well, where the plugin can be easily tested and verified with a simple box.
+IFRA_ObjectPose is a simple ROS 2-Gazebo plugin that publishes the exact WorldPose of any model in Gazebo to a ROS2 Topic. Thanks to this plugin, it is possible to get the (x y z)(yaw pitch roll) information of any object from Gazebo in order to use it within the ROS2 Source Code. The repository contains a Gazebo package as well, where the plugin can be easily tested and verified with a simple box.
 
 <br />
 
 ## INSTALLATION
 
-All ROS2 Packages in this GitHub repository have been tested and verified in ROS2 Foxy and Humble (the plugin has not been tested in other ROS2 distributions yet). It can be easily downloaded and installed by executing the following commands:
+To install the IFRA-ObjectPose packages for ROS 2 Humble and Gazebo Fortress, please execute the following commands:
 
 ```sh
 cd ~/dev_ws/src
-git clone https://github.com/IFRA-Cranfield/IFRA_ObjectPose.git
+git clone -b humble-gzfortress https://github.com/IFRA-Cranfield/IFRA_ObjectPose.git
 cd ~/dev_ws
 colcon build
 ```
@@ -128,7 +128,7 @@ __EXAMPLE: box.urdf__
     ros2 run objectpose_gz SpawnObject.py --package "objectpose_gz" --sdf "box.sdf" --name "box" --x 0.0 --y 0.0 --z 0.0
     ```
 
-3. Check the ObjectPose in the ROS2 Terminal shell:
+3. Check the ObjectPose in the ROS 2 Terminal shell:
     ```sh
     ros2 topic echo /box/ObjectPose
     ```
@@ -171,7 +171,7 @@ __EXAMPLE: box.urdf__
 <p>
   You can cite our work with the following statement:
   <br />
-  IFRA-Cranfield (2023) ObjectPose Plugin for ROS2-Gazebo Simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
+  IFRA-Cranfield (2023) ObjectPose Plugin for ROS 2-Gazebo Simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
 </p>
 
 <br />

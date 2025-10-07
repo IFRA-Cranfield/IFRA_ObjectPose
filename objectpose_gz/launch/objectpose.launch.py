@@ -26,10 +26,10 @@
 
 # ======= CITE OUR WORK ======= #
 # You can cite our work with the following statement:
-# IFRA-Cranfield (2023) ObjectPose Plugin for ROS2-Gazebo Simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
+# IFRA-Cranfield (2023) ObjectPose Plugin for ROS 2-Gazebo Simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
 
 # objectpose.launch.py:
-# Launch file for the IFRA_ObjectPose GAZEBO SIMULATION in ROS2:
+# Launch file for the IFRA_ObjectPose GAZEBO SIMULATION in ROS 2:
 
 # Import libraries:
 import os

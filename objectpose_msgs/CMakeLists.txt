@@ -32,7 +32,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-############## ROS2 .msg and .srv ##############
+############## ROS 2 .msg and .srv ##############
 
 install(
   DIRECTORY  

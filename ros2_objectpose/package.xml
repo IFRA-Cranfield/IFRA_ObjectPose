@@ -3,7 +3,7 @@
 <package format="3">
   <name>ros2_objectpose</name>
   <version>0.0.0</version>
-  <description>IFRA-Cranfield (Cranfield University, UK). Package: IFRA_ObjectPose - ObjectPose GzPlugin (ROS2)</description>
+  <description>IFRA-Cranfield (Cranfield University, UK). Package: IFRA_ObjectPose - ObjectPose GzPlugin (ROS 2)</description>
 
   <author>Mikel Bueno Viso</author>
   <maintainer email="Mikel.Bueno-Viso@cranfield.ac.uk">Mikel Bueno Viso</maintainer>
