@@ -76,17 +76,17 @@ class GzEntitySpawner(Node):
         sdf_path = self._resolve_sdf_path()
         with open(sdf_path, 'r') as f:
             xml = f.read()
-        
-        # Compute absolute path to the mesh: 
+
+        # Compute absolute path to the mesh:
         share = get_package_share_directory(self.args.package)
         sdf_base = os.path.splitext(os.path.basename(self.args.sdf))[0]
         mesh_path = os.path.join(share, 'meshes', 'objects', f'{sdf_base}.dae')
 
         if not os.path.exists(mesh_path):
             self.get_logger().info(f"Mesh not found: {mesh_path}. Ignore this error if the sdf file does not use a mesh.")
-        
+
         # Convert to a correct file URI:
-        mesh_uri = Path(mesh_path).as_uri()   
+        mesh_uri = Path(mesh_path).as_uri()
 
         # Do your existing replacements plus the mesh:
         xml = xml.replace('$(name)', self.args.name)
@@ -97,7 +97,7 @@ class GzEntitySpawner(Node):
 
         req = SpawnEntity.Request()
         req.entity_factory.name = self.args.name
-        req.entity_factory.allow_renaming = True          
+        req.entity_factory.allow_renaming = True
         req.entity_factory.relative_to = "world"
         req.entity_factory.sdf = self.build_sdf_string()
 
@@ -124,7 +124,7 @@ class GzEntitySpawner(Node):
 
 def main():
 
-    parser = argparse.ArgumentParser(description='Spawn an SDF model into a Gazebo (Gz Fortress) world.')
+    parser = argparse.ArgumentParser(description='Spawn an SDF model into a Gazebo (Gazebo Fortress / GZ Sim) world.')
 
     parser.add_argument('--package', type=str, required=True, help='Package where the SDF file is installed.')
     parser.add_argument('--sdf', type=str, default='box.sdf', help='SDF filename (relative to the package share/sdf or absolute path).')

@@ -26,7 +26,7 @@
 
 # ======= CITE OUR WORK ======= #
 # You can cite our work with the following statement:
-# IFRA-Cranfield (2023) ObjectPose Plugin for ROS 2-Gazebo Simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
+# IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Fortress / GZ Sim simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
 
 */
 

@@ -1,4 +1,4 @@
-<!-- 
+<!--
 
 # ===================================== COPYRIGHT ===================================== #
 #                                                                                       #
@@ -26,7 +26,7 @@
 
 # ======= CITE OUR WORK ======= #
 # You can cite our work with the following statement:
-# IFRA-Cranfield (2023) ObjectPose Plugin for ROS 2-Gazebo Simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
+# IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Fortress / GZ Sim simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
 
 -->
 
@@ -37,7 +37,7 @@
 <br />
 <div align="center">
 
-  <h2 align="center">IFRA_ObjectPose - Gazebo-ROS 2 Plugin</h2>
+  <h2 align="center">IFRA_ObjectPose - Gazebo Fortress / GZ Sim Plugin</h2>
 
   <p align="center">
     IFRA (Intelligent Flexible Robotics and Assembly) Group
@@ -71,12 +71,12 @@ Centre for Robotics and Assembly:
 - Facebook: https://www.facebook.com/cranfieldunirobotics/
 - YouTube: https://www.youtube.com/@CranfieldRobotics
 - LinkedIn: https://www.linkedin.com/company/cranfieldrobotics/
-- Website: https://www.cranfield.ac.uk/centres/centre-for-robotics-and-assembly 
+- Website: https://www.cranfield.ac.uk/centres/centre-for-robotics-and-assembly
 
 
 ### IFRA_ObjectPose Repository
 
-IFRA_ObjectPose is a simple ROS 2-Gazebo plugin that publishes the exact WorldPose of any model in Gazebo to a ROS2 Topic. Thanks to this plugin, it is possible to get the (x y z)(yaw pitch roll) information of any object from Gazebo in order to use it within the ROS2 Source Code. The repository contains a Gazebo package as well, where the plugin can be easily tested and verified with a simple box.
+IFRA_ObjectPose is a simple Gazebo Fortress / GZ Sim plugin that publishes the exact WorldPose of any model in Gazebo to a ROS 2 topic. Thanks to this plugin, it is possible to get the (x y z)(yaw pitch roll) information of any object from Gazebo in order to use it within the ROS 2 source code. The repository contains a Gazebo package as well, where the plugin can be easily tested and verified with a simple box.
 
 <br />
 
@@ -95,7 +95,7 @@ colcon build
 
 ## USAGE
 
-The "ros2_objectpose" Gz plugin has to be defined inside a SDF model (.sdf), and it is loaded when the model is spawned into the Gz World. 
+The "ros2_objectpose" GZ Sim plugin has to be defined inside a SDF model (.sdf), and it is loaded when the model is spawned into the GZ Sim world.
 
 The following tag must be added to the .sdf file of any model that wants to be monitored:
 
@@ -107,23 +107,23 @@ The following tag must be added to the .sdf file of any model that wants to be m
 </plugin>
 ```
 
-The object pose will be published to the /{NAME}/ObjectPose topic as soon as the object is spawned to the Gz environment. {NAME} is defined in the CommandLine, when spawning the object to gazebo using the [SpawnObject.py](https://github.com/IFRA-Cranfield/IFRA_ObjectPose/blob/main/ros2_objectpose/python/SpawnObject.py) script.
+The object pose will be published to the /{NAME}/ObjectPose topic as soon as the object is spawned to the GZ Sim environment. {NAME} is defined in the command line, when spawning the object to GZ Sim using the [SpawnObject.py](https://github.com/IFRA-Cranfield/IFRA_ObjectPose/blob/humble-gzfortress/objectpose_gz/python/SpawnObject.py) script.
 
-The following command must be executed in order to spawn any object to the Gazebo World:
+The following command must be executed in order to spawn any object to the GZ Sim world:
 ```sh
   ros2 run objectpose_gz SpawnObject.py --package "objectpose_gz" --sdf "{.sdf FILE}" --name "{NAME}" --x {x} --y {y} --z {z}
 ```
 
 NOTE: It is assumed that the .sdf file of the object is contained inside the /sdf folder of the selected package.
 
-__EXAMPLE: box.urdf__
+__EXAMPLE: box.sdf__
 
-1. Launch the ObjectPose Gz environment:
+1. Launch the ObjectPose GZ Sim environment:
     ```sh
     ros2 launch objectpose_gz objectpose.launch.py
     ```
 
-2. Spawn the BOX to the Gz world:
+2. Spawn the box to the GZ Sim world:
     ```sh
     ros2 run objectpose_gz SpawnObject.py --package "objectpose_gz" --sdf "box.sdf" --name "box" --x 0.0 --y 0.0 --z 0.0
     ```
@@ -133,7 +133,7 @@ __EXAMPLE: box.urdf__
     ros2 topic echo /box/ObjectPose
     ```
 
-4. Manually move the box in the Simulation Environment, and check how the pose information is automatically updated.
+4. Manually move the box in the simulation environment, and check how the pose information is automatically updated.
 
 <br />
 
@@ -144,7 +144,7 @@ __EXAMPLE: box.urdf__
   <br />
   Created on behalf of the IFRA Group at Cranfield University, United Kingdom
   <br />
-  E-mail: IFRA@cranfield.ac.uk 
+  E-mail: IFRA@cranfield.ac.uk
   <br />
   <br />
   Licensed under the Apache-2.0 License.
@@ -171,7 +171,7 @@ __EXAMPLE: box.urdf__
 <p>
   You can cite our work with the following statement:
   <br />
-  IFRA-Cranfield (2023) ObjectPose Plugin for ROS 2-Gazebo Simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
+  IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Fortress / GZ Sim simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
 </p>
 
 <br />
@@ -203,6 +203,6 @@ __EXAMPLE: box.urdf__
   <br />
   LinkedIn: https://www.linkedin.com/in/phil-webb-64283223/
   <br />
-  Profile: https://www.cranfield.ac.uk/people/professor-phil-webb-746415 
+  Profile: https://www.cranfield.ac.uk/people/professor-phil-webb-746415
   <br />
 </p>

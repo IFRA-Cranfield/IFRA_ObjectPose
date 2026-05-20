@@ -26,10 +26,10 @@
 
 # ======= CITE OUR WORK ======= #
 # You can cite our work with the following statement:
-# IFRA-Cranfield (2023) ObjectPose Plugin for ROS 2-Gazebo Simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
+# IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Fortress / GZ Sim simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
 
 # objectpose.launch.py:
-# Launch file for the IFRA_ObjectPose GAZEBO SIMULATION in ROS 2:
+# Launch file for the IFRA_ObjectPose GZ Sim simulation in ROS 2:
 
 # Import libraries:
 import os
@@ -39,12 +39,12 @@ from launch_ros.actions import Node
 from launch.actions import ExecuteProcess, IncludeLaunchDescription, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-    
+
 # ========== **GENERATE LAUNCH DESCRIPTION** ========== #
 def generate_launch_description():
-    
-    # ***** GAZEBO ***** #   
-    # DECLARE GAZEBO WORLD file:
+
+    # ***** GZ Sim ***** #
+    # DECLARE GZ Sim WORLD file:
     world_gz = os.path.join(
         get_package_share_directory('objectpose_gz'),
         'worlds',
@@ -68,9 +68,9 @@ def generate_launch_description():
         arguments=['/world/ros2srrc_GzWorld/create@ros_gz_interfaces/srv/SpawnEntity'],
         output='screen'
     )
-    
+
     # ***** RETURN LAUNCH DESCRIPTION ***** #
     return LaunchDescription([
-        gzSIM, 
+        gzSIM,
         gzSERVICE_bridge
     ])
