@@ -78,7 +78,7 @@ Centre for Robotics and Assembly:
 
 IFRA_ObjectPose is a simple Gazebo Harmonic / GZ Sim plugin that publishes the exact world pose of any model in Gazebo to a ROS 2 topic. Thanks to this plugin, it is possible to get the position and orientation quaternion of any object from Gazebo in order to use it within ROS 2 source code. The repository contains a Gazebo package as well, where the plugin can be easily tested and verified with a simple box.
 
-This repository was originally adapted from the Humble + Gazebo Fortress branch and has been migrated for ROS 2 Jazzy with Gazebo Harmonic.
+This repository has been migrated for ROS 2 Jazzy with Gazebo Harmonic.
 
 <br />
 
@@ -116,7 +116,7 @@ The following command must be executed in order to spawn any object to the GZ Si
   ros2 run objectpose_gz SpawnObject.py --package "objectpose_gz" --sdf "{.sdf FILE}" --name "{NAME}" --x {x} --y {y} --z {z}
 ```
 
-NOTE: It is assumed that the .sdf file of the object is contained inside the /sdf folder of the selected package.
+NOTE: It is assumed that the .sdf file of the object is contained inside the /sdf, /models, or /objects folder of the selected package.
 
 __EXAMPLE: box.sdf__
 

@@ -8,7 +8,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # ROS 2:
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(objectpose_msgs REQUIRED)  # your custom msgs
+find_package(objectpose_msgs REQUIRED)
 
 # Gazebo Harmonic / ROS 2 Jazzy:
 find_package(gz-plugin2 REQUIRED COMPONENTS register)
