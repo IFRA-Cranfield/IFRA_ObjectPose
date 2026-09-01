@@ -33,25 +33,25 @@ if(BUILD_TESTING)
 endif()
 
 install(
-  DIRECTORY 
+  DIRECTORY
     launch
     sdf
     worlds
-  DESTINATION 
+  DESTINATION
     share/${PROJECT_NAME}
 )
 
 # =========================================================== #
 # REQUIRED TO EXECUTE .py scripts:
 install(
-  DIRECTORY 
+  DIRECTORY
     python
-  DESTINATION 
+  DESTINATION
     share/${PROJECT_NAME}
 )
 install(PROGRAMS
   python/SpawnObject.py
-  DESTINATION lib/${PROJECT_NAME} 
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 ament_package()

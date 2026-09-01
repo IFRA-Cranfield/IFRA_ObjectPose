@@ -26,7 +26,7 @@
 
 # ======= CITE OUR WORK ======= #
 # You can cite our work with the following statement:
-# IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Fortress / GZ Sim simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
+# IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Harmonic / GZ Sim simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
 
 */
 
@@ -39,36 +39,34 @@
 #include <rclcpp/rclcpp.hpp>
 #include <objectpose_msgs/msg/object_pose.hpp>
 
-#include <ignition/gazebo/System.hh>
-#include <ignition/gazebo/Model.hh>
-#include <ignition/gazebo/Link.hh>
-#include <ignition/gazebo/components/Pose.hh>
-#include <ignition/gazebo/components/Name.hh>
-#include <ignition/plugin/Register.hh>
+#include <gz/sim/System.hh>
+#include <gz/sim/Model.hh>
+#include <gz/sim/components/Pose.hh>
+#include <gz/sim/components/Name.hh>
 
 namespace ros2_objectpose
 {
 
 class Ros2ObjectPose :
-  public ignition::gazebo::System,
-  public ignition::gazebo::ISystemConfigure,
-  public ignition::gazebo::ISystemPostUpdate
+  public gz::sim::System,
+  public gz::sim::ISystemConfigure,
+  public gz::sim::ISystemPostUpdate
 {
 public:
   Ros2ObjectPose() = default;
   ~Ros2ObjectPose() override;
 
-  void Configure(const ignition::gazebo::Entity &entity,
+  void Configure(const gz::sim::Entity &entity,
                  const std::shared_ptr<const sdf::Element> &sdf,
-                 ignition::gazebo::EntityComponentManager &ecm,
-                 ignition::gazebo::EventManager &/*eventMgr*/) override;
+                 gz::sim::EntityComponentManager &ecm,
+                 gz::sim::EventManager &/*eventMgr*/) override;
 
-  void PostUpdate(const ignition::gazebo::UpdateInfo &info,
-                  const ignition::gazebo::EntityComponentManager &ecm) override;
+  void PostUpdate(const gz::sim::UpdateInfo &info,
+                  const gz::sim::EntityComponentManager &ecm) override;
 
 private:
-  ignition::gazebo::Model model_{ignition::gazebo::kNullEntity};
-  ignition::gazebo::Entity targetEntity_{ignition::gazebo::kNullEntity};
+  gz::sim::Model model_{gz::sim::kNullEntity};
+  gz::sim::Entity targetEntity_{gz::sim::kNullEntity};
   bool targetIsModel_{true};
 
   std::string ns_{};
@@ -83,11 +81,5 @@ private:
 };
 
 } // namespace ros2_objectpose
-
-IGNITION_ADD_PLUGIN(
-  ros2_objectpose::Ros2ObjectPose,
-  ignition::gazebo::System,
-  ros2_objectpose::Ros2ObjectPose::ISystemConfigure,
-  ros2_objectpose::Ros2ObjectPose::ISystemPostUpdate)
 
 #endif // ROS2_OBJECTPOSE_PLUGIN_HPP

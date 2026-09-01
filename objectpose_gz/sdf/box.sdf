@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!-- 
+<!--
 
 # ===================================== COPYRIGHT ===================================== #
 #                                                                                       #
@@ -28,14 +28,14 @@
 
 # ======= CITE OUR WORK ======= #
 # You can cite our work with the following statement:
-# IFRA-Cranfield (2023) ROS 2 Sim-to-Real Robot Control. URL: https://github.com/IFRA-Cranfield/ros2_SimRealRobotControl.
+# IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Harmonic / GZ Sim simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
 
 -->
 
 <sdf version="1.8">
-  
+
   <model name="$(name)">
-    
+
     <static>false</static>
 
     <link name="box">
@@ -57,13 +57,13 @@
       </inertial>
 
       <collision name="box_collision">
-        
+
         <pose>0 0 0 0 0 0</pose>
-        
+
         <geometry>
           <box><size>0.03 0.03 0.03</size></box>
         </geometry>
-        
+
         <surface>
           <contact>
             <collide_without_contact>false</collide_without_contact>
@@ -87,10 +87,10 @@
         </geometry>
 
       </visual>
-      
+
     </link>
 
-    <!-- ObjectPose plugin (Gazebo Fortress system plugin) -->
+    <!-- ObjectPose plugin (Gazebo Harmonic system plugin) -->
     <plugin name="ros2_objectpose_plugin" filename="libros2_objectpose_plugin.so">
       <topic>$(name)/ObjectPose</topic>
       <object_name>$(name)</object_name>

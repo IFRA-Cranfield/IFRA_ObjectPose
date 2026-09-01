@@ -26,16 +26,17 @@
 
 # ======= CITE OUR WORK ======= #
 # You can cite our work with the following statement:
-# IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Fortress / GZ Sim simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
+# IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Harmonic / GZ Sim simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
 
 */
 
 // INCLUDE -> HPP header file:
 #include "ros2_objectpose/ros2_objectpose_plugin.hpp"
-// INLCUDE -> Ignition Gazebo:
-#include <ignition/gazebo/EntityComponentManager.hh>
-#include <ignition/gazebo/Util.hh>
-#include <ignition/math/Pose3.hh>
+// INCLUDE -> Gazebo Harmonic:
+#include <gz/sim/EntityComponentManager.hh>
+#include <gz/sim/Util.hh>
+#include <gz/math/Pose3.hh>
+#include <gz/plugin/Register.hh>
 
 namespace ros2_objectpose
 {
@@ -47,12 +48,12 @@ Ros2ObjectPose::~Ros2ObjectPose()
     rclcpp::shutdown();
 }
 
-void Ros2ObjectPose::Configure(const ignition::gazebo::Entity &entity,
+void Ros2ObjectPose::Configure(const gz::sim::Entity &entity,
                                const std::shared_ptr<const sdf::Element> &sdf,
-                               ignition::gazebo::EntityComponentManager &ecm,
-                               ignition::gazebo::EventManager &)
+                               gz::sim::EntityComponentManager &ecm,
+                               gz::sim::EventManager &)
 {
-  model_ = ignition::gazebo::Model(entity);
+  model_ = gz::sim::Model(entity);
   targetEntity_ = entity;
   targetIsModel_ = true;
 
@@ -75,22 +76,22 @@ void Ros2ObjectPose::Configure(const ignition::gazebo::Entity &entity,
     {
       const auto linkName = sdf->Get<std::string>("link_name");
       auto linkEntity = model_.LinkByName(ecm, linkName);
-      if (linkEntity != ignition::gazebo::kNullEntity)
+      if (linkEntity != gz::sim::kNullEntity)
       {
         targetEntity_ = linkEntity;
         targetIsModel_ = false;
       }
       else
       {
-        igndbg << "[Ros2ObjectPose] link_name '" << linkName
-               << "' not found; falling back to model pose.\n";
+        gzdbg << "[Ros2ObjectPose] link_name '" << linkName
+              << "' not found; falling back to model pose.\n";
       }
     }
   }
 
   if (object_name_.empty())
   {
-    auto nameComp = ecm.Component<ignition::gazebo::components::Name>(targetEntity_);
+    auto nameComp = ecm.Component<gz::sim::components::Name>(targetEntity_);
     object_name_ = nameComp ? nameComp->Data() : std::string("object");
   }
 
@@ -113,19 +114,15 @@ void Ros2ObjectPose::Configure(const ignition::gazebo::Entity &entity,
   pub_ = node_->create_publisher<objectpose_msgs::msg::ObjectPose>(
       topic_, rclcpp::QoS(10));
 
-  // Ensure pose component exists so PostUpdate can read it
-  ecm.CreateComponent(targetEntity_, ignition::gazebo::components::Pose());
+  ecm.CreateComponent(targetEntity_, gz::sim::components::Pose());
 }
 
-void Ros2ObjectPose::PostUpdate(const ignition::gazebo::UpdateInfo &,
-                                const ignition::gazebo::EntityComponentManager &ecm)
+void Ros2ObjectPose::PostUpdate(const gz::sim::UpdateInfo &,
+                                const gz::sim::EntityComponentManager &ecm)
 {
   if (!pub_) return;
 
-  auto poseComp = ecm.Component<ignition::gazebo::components::Pose>(targetEntity_);
-  if (!poseComp) return;
-
-  const auto &p = poseComp->Data();
+  const auto p = gz::sim::worldPose(targetEntity_, ecm);
 
   objectpose_msgs::msg::ObjectPose msg;
   msg.objectname = object_name_;
@@ -142,10 +139,10 @@ void Ros2ObjectPose::PostUpdate(const ignition::gazebo::UpdateInfo &,
 
 } // namespace ros2_objectpose
 
-IGNITION_ADD_PLUGIN(
+GZ_ADD_PLUGIN(
   ros2_objectpose::Ros2ObjectPose,
-  ignition::gazebo::System,
+  gz::sim::System,
   ros2_objectpose::Ros2ObjectPose::ISystemConfigure,
   ros2_objectpose::Ros2ObjectPose::ISystemPostUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(ros2_objectpose::Ros2ObjectPose, "ros2_objectpose_plugin")
+GZ_ADD_PLUGIN_ALIAS(ros2_objectpose::Ros2ObjectPose, "ros2_objectpose_plugin")

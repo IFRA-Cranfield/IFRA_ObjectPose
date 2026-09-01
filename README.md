@@ -26,7 +26,7 @@
 
 # ======= CITE OUR WORK ======= #
 # You can cite our work with the following statement:
-# IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Fortress / GZ Sim simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
+# IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Harmonic / GZ Sim simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
 
 -->
 
@@ -37,7 +37,7 @@
 <br />
 <div align="center">
 
-  <h2 align="center">IFRA_ObjectPose - Gazebo Fortress / GZ Sim Plugin</h2>
+  <h2 align="center">IFRA_ObjectPose - Gazebo Harmonic / GZ Sim Plugin</h2>
 
   <p align="center">
     IFRA (Intelligent Flexible Robotics and Assembly) Group
@@ -76,17 +76,19 @@ Centre for Robotics and Assembly:
 
 ### IFRA_ObjectPose Repository
 
-IFRA_ObjectPose is a simple Gazebo Fortress / GZ Sim plugin that publishes the exact WorldPose of any model in Gazebo to a ROS 2 topic. Thanks to this plugin, it is possible to get the (x y z)(yaw pitch roll) information of any object from Gazebo in order to use it within the ROS 2 source code. The repository contains a Gazebo package as well, where the plugin can be easily tested and verified with a simple box.
+IFRA_ObjectPose is a simple Gazebo Harmonic / GZ Sim plugin that publishes the exact world pose of any model in Gazebo to a ROS 2 topic. Thanks to this plugin, it is possible to get the position and orientation quaternion of any object from Gazebo in order to use it within ROS 2 source code. The repository contains a Gazebo package as well, where the plugin can be easily tested and verified with a simple box.
+
+This repository was originally adapted from the Humble + Gazebo Fortress branch and has been migrated for ROS 2 Jazzy with Gazebo Harmonic.
 
 <br />
 
 ## INSTALLATION
 
-To install the IFRA-ObjectPose packages for ROS 2 Humble and Gazebo Fortress, please execute the following commands:
+To install the IFRA-ObjectPose packages for ROS 2 Jazzy and Gazebo Harmonic, please execute the following commands:
 
 ```sh
 cd ~/dev_ws/src
-git clone -b humble-gzfortress https://github.com/IFRA-Cranfield/IFRA_ObjectPose.git
+git clone -b jazzy https://github.com/IFRA-Cranfield/IFRA_ObjectPose.git
 cd ~/dev_ws
 colcon build
 ```
@@ -100,14 +102,14 @@ The "ros2_objectpose" GZ Sim plugin has to be defined inside a SDF model (.sdf),
 The following tag must be added to the .sdf file of any model that wants to be monitored:
 
 ```sh
-<!-- ObjectPose plugin (Gazebo Fortress system plugin) -->
+<!-- ObjectPose plugin (Gazebo Harmonic system plugin) -->
 <plugin name="ros2_objectpose_plugin" filename="libros2_objectpose_plugin.so">
   <topic>$(name)/ObjectPose</topic>
   <object_name>$(name)</object_name>
 </plugin>
 ```
 
-The object pose will be published to the /{NAME}/ObjectPose topic as soon as the object is spawned to the GZ Sim environment. {NAME} is defined in the command line, when spawning the object to GZ Sim using the [SpawnObject.py](https://github.com/IFRA-Cranfield/IFRA_ObjectPose/blob/humble-gzfortress/objectpose_gz/python/SpawnObject.py) script.
+The object pose will be published to the /{NAME}/ObjectPose topic as soon as the object is spawned to the GZ Sim environment. {NAME} is defined in the command line, when spawning the object to GZ Sim using the [SpawnObject.py](https://github.com/IFRA-Cranfield/IFRA_ObjectPose/blob/jazzy/objectpose_gz/python/SpawnObject.py) script.
 
 The following command must be executed in order to spawn any object to the GZ Sim world:
 ```sh
@@ -171,7 +173,7 @@ __EXAMPLE: box.sdf__
 <p>
   You can cite our work with the following statement:
   <br />
-  IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Fortress / GZ Sim simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
+  IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Harmonic / GZ Sim simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
 </p>
 
 <br />

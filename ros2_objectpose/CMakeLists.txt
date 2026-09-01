@@ -10,11 +10,10 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(objectpose_msgs REQUIRED)  # your custom msgs
 
-# Gazebo Fortress (Ignition):
-find_package(ignition-plugin1 REQUIRED COMPONENTS register)
-find_package(ignition-gazebo6 REQUIRED)
-find_package(ignition-math6 REQUIRED)
-find_package(ignition-common4 REQUIRED)
+# Gazebo Harmonic / ROS 2 Jazzy:
+find_package(gz-plugin2 REQUIRED COMPONENTS register)
+find_package(gz-sim8 REQUIRED)
+find_package(gz-math7 REQUIRED)
 
 add_library(ros2_objectpose_plugin SHARED
   src/ros2_objectpose_plugin.cpp
@@ -28,12 +27,11 @@ target_include_directories(ros2_objectpose_plugin
 
 target_compile_features(ros2_objectpose_plugin PUBLIC cxx_std_17)
 
-# Link against Ignition targets for Fortress:
+# Link against Gazebo Harmonic targets:
 target_link_libraries(ros2_objectpose_plugin
-  ignition-plugin1::ignition-plugin1
-  ignition-gazebo6::ignition-gazebo6
-  ignition-math6::ignition-math6
-  ignition-common4::ignition-common4
+  gz-plugin2::gz-plugin2
+  gz-sim8::gz-sim8
+  gz-math7::gz-math7
 )
 
 ament_target_dependencies(ros2_objectpose_plugin
@@ -43,6 +41,11 @@ ament_target_dependencies(ros2_objectpose_plugin
 
 install(TARGETS ros2_objectpose_plugin LIBRARY DESTINATION lib)
 install(DIRECTORY include/ DESTINATION include)
+
+ament_environment_hooks(
+  environment/gz_sim_system_plugin_path.dsv
+  environment/gz_sim_system_plugin_path.sh
+)
 
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp objectpose_msgs)

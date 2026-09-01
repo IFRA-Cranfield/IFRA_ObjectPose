@@ -26,19 +26,19 @@
 
 # ======= CITE OUR WORK ======= #
 # You can cite our work with the following statement:
-# IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Fortress / GZ Sim simulation. URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
+# IFRA-Cranfield (2023) ObjectPose Plugin for Gazebo Harmonic / GZ Sim simulation.
+# URL: https://github.com/IFRA-Cranfield/IFRA_ObjectPose.
 
 # objectpose.launch.py:
 # Launch file for the IFRA_ObjectPose GZ Sim simulation in ROS 2:
 
-# Import libraries:
 import os
+
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch_ros.actions import Node
-from launch.actions import ExecuteProcess, IncludeLaunchDescription, RegisterEventHandler
-from launch.event_handlers import OnProcessExit
+from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.actions import Node
 
 # ========== **GENERATE LAUNCH DESCRIPTION** ========== #
 def generate_launch_description():
@@ -52,7 +52,10 @@ def generate_launch_description():
     # DECLARE Gazebo LAUNCH file:
     gzSIM = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            [os.path.join(get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')]
+            [os.path.join(
+                get_package_share_directory('ros_gz_sim'),
+                'launch',
+                'gz_sim.launch.py')]
         ),
         launch_arguments={
             'gz_args': f'-r -v 1 "{world_gz}"',
@@ -65,7 +68,8 @@ def generate_launch_description():
         package='ros_gz_bridge',
         executable='parameter_bridge',
         name='gz_spawn_service_bridge',
-        arguments=['/world/ros2srrc_GzWorld/create@ros_gz_interfaces/srv/SpawnEntity'],
+        arguments=[
+            '/world/ros2srrc_GzWorld/create@ros_gz_interfaces/srv/SpawnEntity'],
         output='screen'
     )
 
